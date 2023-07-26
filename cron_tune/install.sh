@@ -30,9 +30,17 @@ pip install -r requirements.txt
 while true; do
     add_cron_job
 
-    echo "Do you want to add another cron job? (yes/no)"
-    read add_another
-    if [[ $add_another != "yes" ]]; then
+    while true; do
+        echo "Do you want to add another cron job? (yes/no)"
+        read add_another
+        if [[ $add_another == "yes" || $add_another == "no" ]]; then
+            break
+        else
+            echo "Invalid input. Please enter 'yes' or 'no'."
+        fi
+    done
+
+    if [[ $add_another == "no" ]]; then
         break
     fi
 done
