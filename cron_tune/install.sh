@@ -41,7 +41,7 @@ function validate_wattage() {
 
 # Function to set up everything
 function setup_cron_jobs() {
-      # Install python3-venv (for Ubuntu systems)
+    # Install python3-venv (for Ubuntu systems)
     if [[ -f /etc/lsb-release && $(grep "DISTRIB_ID=Ubuntu" /etc/lsb-release) ]]; then
         sudo apt-get update
         sudo apt-get install -y python3-venv
@@ -79,7 +79,7 @@ function setup_cron_jobs() {
         cron_time="$hour_of_day * * *"
         cron_job="$cron_time $venv_python_path /opt/cron_tune/main.py $ip_address $wattage"
 
-        (crontab -l ; echo "$cron_job") | crontab -
+        echo "$cron_job" | sudo tee -a /etc/crontab
 
         echo "Cron job added for $hour_of_day:00 to run your Python script with IP: $ip_address and Wattage: $wattage."
 
