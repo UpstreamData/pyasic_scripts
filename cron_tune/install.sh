@@ -7,17 +7,17 @@ cron_jobs=()
 function add_cron_job() {
     echo "Enter the hour of the day to run the script (in 24-hour format, e.g., 0-23):"
     read hour_of_day
-    echo "Enter the IP address:"
+    echo "Enter the IP address of the miner to set tuning (e.g. 192.168.1.20):"
     read ip_address
-    echo "Enter the wattage:"
+    echo "Enter the wattage to set on the miner (e.g. 2400):"
     read wattage
     cron_time="$hour_of_day * * *"
     cron_jobs+=("$cron_time /path/to/venv/bin/python /path/to/your_python_file.py $ip_address $wattage")
 }
 
 # Download the Python file and requirements.txt from GitHub
-wget https://raw.githubusercontent.com/yourusername/yourrepository/main/your_python_file.py
-wget https://raw.githubusercontent.com/yourusername/yourrepository/main/requirements.txt
+wget https://raw.githubusercontent.com/UpstreamData/pyasic_scripts/master/cron_tune/main.py
+wget https://raw.githubusercontent.com/UpstreamData/pyasic_scripts/master/cron_tune/requirements.txt
 
 # Set up a virtual environment
 python3 -m venv venv
