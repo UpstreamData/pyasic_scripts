@@ -30,6 +30,19 @@ function validate_hour() {
     fi
 }
 
+function validate_minute() {
+    local hour=$1
+    if ! [[ $hour =~ ^[0-9]+$ ]]; then
+        echo "Invalid minute format. Please enter a number between 0 and 23."
+        return 1
+    fi
+
+    if ((hour < 0 || hour > 59)); then
+        echo "Invalid minute. Please enter a number between 0 and 59."
+        return 1
+    fi
+}
+
 # Function to validate the wattage
 function validate_wattage() {
     local wattage=$1
@@ -62,8 +75,12 @@ function setup_cron_jobs() {
     # Loop to add cron jobs
     while true; do
         echo "Enter the hour of the day to run the script (in 24-hour format, e.g., 0-23):"
-        read hour_of_day
-        validate_hour "$hour_of_day" || continue
+        read hour
+        validate_hour "$hour" || continue
+
+        echo "Enter the minute to run the script (e.g. 0-59):"
+        read minute
+        validate_minute "$minute" || continue
 
         echo "Enter the IP address of the miner to set tuning (e.g. 192.168.1.20):"
         read ip_address
@@ -76,12 +93,12 @@ function setup_cron_jobs() {
         # Get the path to the virtual environment's Python interpreter
         venv_python_path=$(which python)
 
-        cron_time="$hour_of_day * * *"
+        cron_time="$minute $hour * * *"
         cron_job="$cron_time $venv_python_path /opt/cron_tune/main.py $ip_address $wattage"
 
         echo "$cron_job" | sudo tee -a /etc/crontab
 
-        echo "Cron job added for $hour_of_day:00 to run your Python script with IP: $ip_address and Wattage: $wattage."
+        echo "Cron job added for $hour:$minute to run your Python script with IP: $ip_address and Wattage: $wattage."
 
         echo "Do you want to add another cron job? (yes/no)"
         read add_another
