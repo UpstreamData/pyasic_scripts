@@ -1,5 +1,11 @@
 #!/bin/bash
 
+############################################################################################################################################################
+# RUN WITH                                                                                                                                                 #
+# curl -sSL https://raw.githubusercontent.com/UpstreamData/pyasic_scripts/master/cron_tune/install.sh -o install.sh && chmod +x install.sh && ./install.sh #
+############################################################################################################################################################
+
+
 # Function to validate the IP address format
 function validate_ip() {
     local ip=$1
@@ -35,6 +41,12 @@ function validate_wattage() {
 
 # Function to set up everything
 function setup_cron_jobs() {
+      # Install python3-venv (for Ubuntu systems)
+    if [[ -f /etc/lsb-release && $(grep "DISTRIB_ID=Ubuntu" /etc/lsb-release) ]]; then
+        sudo apt-get update
+        sudo apt-get install -y python3-venv
+    fi
+
     # Download the Python file and requirements.txt from GitHub
     mkdir -p /opt/cron_tune
     wget -O /opt/cron_tune/main.py https://raw.githubusercontent.com/UpstreamData/pyasic_scripts/master/cron_tune/main.py
