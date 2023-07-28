@@ -98,7 +98,10 @@ function setup_cron_jobs() {
 
         echo "$cron_job" | sudo tee -a /etc/crontab
 
-        echo "Cron job added for $hour:$minute to run your Python script with IP: $ip_address and Wattage: $wattage."
+        formatted_hour=$(printf "%02d" "$hour")
+        formatted_minute=$(printf "%02d" "$minute")
+
+        echo "Cron job added for $formatted_hour:$formatted_minute to run your Python script with IP: $ip_address and Wattage: $wattage."
 
         echo "Do you want to add another cron job? (yes/no)"
         read add_another
