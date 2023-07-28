@@ -62,6 +62,8 @@ function setup_cron_jobs() {
 
     # Download the Python file and requirements.txt from GitHub
     mkdir -p /opt/cron_tune
+    sudo rm /opt/cron_tune/main.py
+    sudo rm /opt/cron_tune/requirements.txt
     wget -O /opt/cron_tune/main.py https://raw.githubusercontent.com/UpstreamData/pyasic_scripts/master/cron_tune/main.py
     wget -O /opt/cron_tune/requirements.txt https://raw.githubusercontent.com/UpstreamData/pyasic_scripts/master/cron_tune/requirements.txt
 
