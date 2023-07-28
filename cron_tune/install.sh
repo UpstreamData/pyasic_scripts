@@ -99,7 +99,7 @@ function setup_cron_jobs() {
         venv_python_path=$(which python)
 
         cron_time="$minute $hour * * *"
-        cron_job="$cron_time $venv_python_path /opt/cron_tune/main.py $ip_address $wattage"
+        cron_job="$cron_time root $venv_python_path /opt/cron_tune/main.py $ip_address $wattage"
 
         echo "$cron_job" | sudo tee -a /etc/crontab
 
