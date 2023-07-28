@@ -64,8 +64,11 @@ function setup_cron_jobs() {
     mkdir -p /opt/cron_tune
     sudo rm /opt/cron_tune/main.py
     sudo rm /opt/cron_tune/requirements.txt
-    wget -O /opt/cron_tune/main.py https://raw.githubusercontent.com/UpstreamData/pyasic_scripts/master/cron_tune/main.py
-    wget -O /opt/cron_tune/requirements.txt https://raw.githubusercontent.com/UpstreamData/pyasic_scripts/master/cron_tune/requirements.txt
+    wget -O /tmp/main.py https://raw.githubusercontent.com/UpstreamData/pyasic_scripts/master/cron_tune/main.py
+    wget -O /tmp/requirements.txt https://raw.githubusercontent.com/UpstreamData/pyasic_scripts/master/cron_tune/requirements.txt
+
+    sudo mv /tmp/main.py /opt/cron_tune/main.py
+    sudo mv /tmp/requirements.txt /opt/cron_tune/requirements.txt
 
     # Set up a virtual environment
     python3 -m venv /opt/cron_tune/venv
