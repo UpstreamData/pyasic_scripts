@@ -6,17 +6,17 @@ import logging
 import platform
 
 
-log_file = '/opt/cron_tune/cron_tune.log'
-if platform.system() == 'Windows':
+log_file = "/opt/cron_tune/cron_tune.log"
+if platform.system() == "Windows":
     # If running on Windows, use a file in the current directory for logging
-    log_file = 'cron_tune.log'
+    log_file = "cron_tune.log"
 
 log_level = logging.INFO
 
 logger = logging.getLogger()
 logger.setLevel(log_level)
 file_handler = logging.FileHandler(log_file)
-log_format = '(%(asctime)s)[%(levelname)s] - %(message)s'
+log_format = "(%(asctime)s)[%(levelname)s] - %(message)s"
 formatter = logging.Formatter(log_format)
 file_handler.setFormatter(formatter)
 logger.addHandler(file_handler)
@@ -24,18 +24,41 @@ logger.addHandler(file_handler)
 
 async def main():
     ip = sys.argv[1]
-    wattage = sys.argv[2]
+    wattage_shutdown = sys.argv[2]
+    if str(wattage_shutdown) in ["on", "off"]:
+        await set_shutdown(ip, wattage_shutdown)
+    else:
+        await set_tuning(ip, int(wattage_shutdown))
 
-    logging.info(f"Setting tuning for miner:\n\t[IP] - {ip}\n\t[Wattage] - {wattage}")
 
-    miner = await pyasic.get_miner(ip)
+async def set_shutdown(ip: str, mode: str):
+    logging.info(
+        f"Setting shutdown mode for miner:\n\t[IP] - {ip}\n\t[Mode] - {'Enabled' if mode == 'on' else 'Disabled'}"
+    )
 
-    if miner is None:
-        logging.critical(f"Could not identify miner:\n\t[IP] - {ip}")
+    miner = await identify_miner(ip)
+
+    if not miner.supports_shutdown:
+        logging.error(f"Miner type does not support shutdown mode: {miner}")
         logging.info(f"Stopping.")
         exit(-1)
 
-    logging.info(f"Found miner type: {miner}")
+    logging.info(f"Pushing shutdown mode update.")
+
+    if mode == "on":
+        await miner.resume_mining()
+    if mode == "off":
+        await miner.stop_mining()
+
+    logging.info(
+        f"Done. Miner should now be {'enabled' if mode == 'on' else 'disabled'}."
+    )
+
+
+async def set_tuning(ip: str, wattage: int):
+    logging.info(f"Setting tuning for miner:\n\t[IP] - {ip}\n\t[Wattage] - {wattage}")
+
+    miner = await identify_miner(ip)
 
     if not miner.supports_autotuning:
         logging.error(f"Miner type does not support setting power limit: {miner}")
@@ -47,6 +70,18 @@ async def main():
     await miner.set_power_limit(int(wattage))
 
     logging.info(f"Done. Miner should now be set to {wattage}W")
+
+
+async def identify_miner(ip: str):
+    miner = await pyasic.get_miner(ip)
+
+    if miner is None:
+        logging.critical(f"Could not identify miner:\n\t[IP] - {ip}")
+        logging.info(f"Stopping.")
+        exit(-1)
+
+    logging.info(f"Found miner type: {miner}")
+    return miner
 
 
 asyncio.run(main())

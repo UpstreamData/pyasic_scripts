@@ -43,6 +43,15 @@ function validate_minute() {
     fi
 }
 
+# Function to validate the mode selection
+function validate_mode() {
+    local mode=$1
+    if [[ $mode != "s" && $mode != "t" ]]; then
+        echo "Invalid mode. Please enter 's' for shutdown or 't' for tune."
+        return 1
+    fi
+}
+
 # Function to validate the wattage
 function validate_wattage() {
     local wattage=$1
@@ -91,22 +100,39 @@ function setup_cron_jobs() {
         read ip_address
         validate_ip "$ip_address" || continue
 
-        echo "Enter the wattage to set on the miner (e.g. 2400):"
-        read wattage
-        validate_wattage "$wattage" || continue
+        echo "Select mode: 's' for shutdown or 't' for tune:"
+        read mode
+        validate_mode "$mode" || continue
+
+        if [ "$mode" == "t" ]; then
+            echo "Enter the wattage to set on the miner (e.g. 2400):"
+            read wattage
+            validate_value "$wattage" || continue
+
+            mode_arg=$wattage
+        else
+            echo "Select 'on' or 'off' for shutdown mode ('on' for mining enabled, 'off' for mining disabled):"
+            read shutdown_option
+            if [[ $shutdown_option != "on" && $shutdown_option != "off" ]]; then
+                echo "Invalid shutdown option. Please enter 'on' or 'off'."
+                continue
+            fi
+
+            mode_arg=$shutdown_option
+        fi
 
         # Get the path to the virtual environment's Python interpreter
         venv_python_path=$(which python)
 
         cron_time="$minute $hour * * *"
-        cron_job="$cron_time root $venv_python_path /opt/cron_tune/main.py $ip_address $wattage"
+        cron_job="$cron_time root $venv_python_path /opt/cron_tune/main.py $ip_address $mode_arg"
 
         echo "$cron_job" | sudo tee -a /etc/crontab
 
         formatted_hour=$(printf "%02d" "$hour")
         formatted_minute=$(printf "%02d" "$minute")
 
-        echo "Cron job added for $formatted_hour:$formatted_minute to run your Python script with IP: $ip_address and Wattage: $wattage."
+        echo "Cron job added for $formatted_hour:$formatted_minute to run your Python script with IP: $ip_address, Argument: $shutdown_option."
 
         echo "Do you want to add another cron job? (yes/no)"
         read add_another
