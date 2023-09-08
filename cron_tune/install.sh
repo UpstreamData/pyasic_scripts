@@ -107,7 +107,7 @@ function setup_cron_jobs() {
         if [ "$mode" == "t" ]; then
             echo "Enter the wattage to set on the miner (e.g. 2400):"
             read wattage
-            validate_value "$wattage" || continue
+            validate_wattage "$wattage" || continue
 
             mode_arg=$wattage
         else
