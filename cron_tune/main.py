@@ -46,10 +46,23 @@ async def set_shutdown(ip: str, mode: str):
 
     logging.info(f"Pushing shutdown mode update.")
 
-    if mode == "on":
-        await miner.resume_mining()
-    if mode == "off":
-        await miner.stop_mining()
+    for i in range(RETRIES):
+        if mode == "on":
+            result = await miner.resume_mining()
+        else:
+            result = await miner.stop_mining()
+
+        if result is not False:
+            break
+
+        logging.error(
+            f"Set shutdown mode (Attempt {i + 1}) failed on miner:\n\t[IP] - {ip}\n\t[Mode] - {'Enabled' if mode == 'on' else 'Disabled'}"
+        )
+        if i + 1 == RETRIES:
+            logging.critical(
+                f"Set shutdown mode failed after {RETRIES} retries, exiting."
+            )
+            exit(-1)
 
     logging.info(
         f"Done. Miner should now be {'enabled' if mode == 'on' else 'disabled'}."
@@ -75,7 +88,7 @@ async def set_tuning(ip: str, wattage: int):
             break
 
         logging.error(
-            f"Apply power limit (Attempt {i + 1}) failed on miner: \n\t[IP] - {ip}\n\t[Wattage] - {wattage}"
+            f"Apply power limit (Attempt {i + 1}) failed on miner:\n\t[IP] - {ip}\n\t[Wattage] - {wattage}"
         )
         if i + 1 == RETRIES:
             logging.critical(
