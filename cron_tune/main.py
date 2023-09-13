@@ -5,6 +5,7 @@ import asyncio
 import logging
 import platform
 
+RETRIES = 3
 
 log_file = "/opt/cron_tune/cron_tune.log"
 if platform.system() == "Windows":
@@ -67,7 +68,20 @@ async def set_tuning(ip: str, wattage: int):
 
     logging.info(f"Pushing power limit update: {wattage}W")
 
-    await miner.set_power_limit(int(wattage))
+    for i in range(RETRIES):
+        result = await miner.set_power_limit(int(wattage))
+
+        if result is not False:
+            break
+
+        logging.error(
+            f"Apply power limit (Attempt {i + 1}) failed on miner: \n\t[IP] - {ip}\n\t[Wattage] - {wattage}"
+        )
+        if i + 1 == RETRIES:
+            logging.critical(
+                f"Apply power limit failed after {RETRIES} retries, exiting."
+            )
+            exit(-1)
 
     logging.info(f"Done. Miner should now be set to {wattage}W")
 
